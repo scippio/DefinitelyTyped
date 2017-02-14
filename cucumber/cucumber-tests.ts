@@ -1,5 +1,5 @@
-import * as cucumber from "cucumber";
 import * as assert from "power-assert";
+import cucumber = require("cucumber");
 
 function StepSample() {
 	type Callback = cucumber.CallbackStepDefinition;
@@ -8,6 +8,12 @@ function StepSample() {
 	type Hooks = cucumber.Hooks;
 	var step = <cucumber.StepDefinitions>this;
 	var hook = <cucumber.Hooks>this;
+
+	hook.setWorldConstructor(function() {
+		this.visit = function(url: string, callback: Callback) {
+			callback(null, 'pending');
+		}
+	})
 
 	hook.Before(function(scenario: HookScenario, callback: Callback){
 		scenario.isFailed() && callback.pending();
@@ -96,3 +102,15 @@ function StepSample() {
 	cucumber.clearSupportCodeFns();
 }
 
+function registerListener(): cucumber.EventListener {
+	let listener = Object.assign(cucumber.Listener(), {
+		handleBeforeScenarioEvent: (scenario: cucumber.events.ScenarioPayload, callback: () => void) => {
+
+			// do some interesting stuff ...
+
+			callback();
+		}
+	});
+
+	return listener;
+}
